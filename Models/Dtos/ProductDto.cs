@@ -8,7 +8,7 @@ namespace Shopbridge_base.Domain.Models.Dtos
 {
     public class ProductDto
     {
-        private const string V = @"^\$?\d+(\.(\d{2}))?$";
+        private const string V = @"/^[+-]?([0-9]+\.?[0-9]*|\.[0-9]+)$/";
 
         public int Product_Id { get; set; }
 
@@ -18,6 +18,7 @@ namespace Shopbridge_base.Domain.Models.Dtos
         public string Name { get; set; }
 
         [Required(ErrorMessage = "Product Price Required")]
+        [Range(1, double.MaxValue, ErrorMessage = "Only positive number allowed")]
         [RegularExpression(V, ErrorMessage = "Only Numbers allowed.")]
         public Decimal Price { get; set; }
 
