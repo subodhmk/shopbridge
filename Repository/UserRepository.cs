@@ -26,55 +26,77 @@ namespace Shopbridge_base.Repository
 
         public User Authenticate(string username, string password)
         {
-            var user = _db.Users.SingleOrDefault(x => x.Username == username && x.Password == password);
-
-            if (user == null)
+            try
             {
-                return null;
-            }
+                var user = _db.Users.SingleOrDefault(x => x.Username == username && x.Password == password);
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
-            var tokenDescrptor = new SecurityTokenDescriptor
-            {
-                Subject = new System.Security.Claims.ClaimsIdentity(new Claim[] {
+                if (user == null)
+                {
+                    return null;
+                }
+
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+                var tokenDescrptor = new SecurityTokenDescriptor
+                {
+                    Subject = new System.Security.Claims.ClaimsIdentity(new Claim[] {
 
                     new Claim(ClaimTypes.Name,user.Id.ToString()),
                     new Claim(ClaimTypes.Role,user.Role)
                 }),
-                Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
+                    Expires = DateTime.UtcNow.AddDays(7),
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
 
-            var Token = tokenHandler.CreateToken(tokenDescrptor);
-            user.Token = tokenHandler.WriteToken(Token);
-            user.Password = ""; 
-            return user;
+                var Token = tokenHandler.CreateToken(tokenDescrptor);
+                user.Token = tokenHandler.WriteToken(Token);
+                user.Password = "";
+                return user;
+            }
+            catch (Exception Ex)
+            {
+                return null;
+            }
         }
 
         public bool IsUniqueUser(string username)
         {
-            var user = _db.Users.SingleOrDefault(x => x.Username == username);
+            try
+            {
+                var user = _db.Users.SingleOrDefault(x => x.Username == username);
 
-            if (user == null)
-                return true;
+                if (user == null)
+                    return true;
 
-            return false;
+                return false;
+            }
+            catch (Exception Ex)
+            {
+                return false;               
+            }
         }
 
         public User Register(string username, string password)
         {
-            User objuser = new User()
+            try
             {
-                Username = username,
-                Password = password,
-                Role = "Admin"
-            };
+                User objuser = new User()
+                {
+                    Username = username,
+                    Password = password,
+                    Role = "Admin"
+                };
 
-            _db.Users.Add(objuser);
-            _db.SaveChanges();
-            objuser.Password = "";
-            return objuser;
+                _db.Users.Add(objuser);
+                _db.SaveChanges();
+                objuser.Password = "";
+                return objuser;
+            }
+            catch (Exception Ex)
+            {
+
+                return null;
+            }
         }
     }
 }
